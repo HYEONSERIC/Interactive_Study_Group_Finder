@@ -56,3 +56,41 @@ button:hover {
 a {
     color: #5c67f2;
 }
+
+.login-container {
+    background-color: #fafafa; 
+    border-color: #5c67f2; 
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    border-color: #5c67f2; 
+}
+
+.login-container button {
+    background-color: #4a54e1; 
+}
+
+.login-container button:hover {
+    background-color: #383fda; 
+}
+
+/* 회원가입 페이지 전용 스타일 */
+.signup-container {
+    background-color: #fff; 
+    border-color: #ccc; 
+}
+
+.signup-container input[type="text"],
+.signup-container input[type="email"],
+.signup-container input[type="password"] {
+    border-color: #ccc; 
+}
+
+.signup-container button {
+    background-color: #5c67f2; 
+}
+
+.signup-container button:hover {
+    background-color: #4a54e1; 
+}
