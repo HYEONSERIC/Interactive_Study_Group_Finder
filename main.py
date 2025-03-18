@@ -148,19 +148,6 @@ def add_subject(subject_name: str, db: Session = Depends(get_db)):
     db.refresh(new_subject)
     return new_subject
 
-# student_information
-@app.get("/search_students")
-def search_students(name: str = Query(None), email: str = Query(None), db: Session = Depends(get_db)):
-    query = db.query(StudentInformation)
-    if name:
-        query = query.filter(StudentInformation.name == name)
-    if email:
-        query = query.filter(StudentInformation.email == email)
-    
-    student = query.first()
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-    return student
 
 # student_information
 @app.get("/students", response_model=List[StudentResponse])
