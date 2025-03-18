@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2 id="welcomeMessage">Welcome to Homepage</h2>
+        <p>You have successfully logged in.</p>
+        <button onclick="logout()">Logout</button>
+    </div>
+</body>
+
+<script>
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Unauthorized access! Redirecting to login.");
+        window.location.href = "login.html"; // Redirect to login if not logged in
+    } else {
+        // Display welcome message
+        document.getElementById("welcomeMessage").textContent = "Login successful! Welcome to Homepage";
+    }
+
+    // Logout function
+    function logout() {
+        localStorage.removeItem("token"); // Remove token
+        alert("You have been logged out.");
+        window.location.href = "login.html"; // Redirect to login page
+    }
+</script>
+
+</html>
