@@ -82,7 +82,9 @@ class AvailableSubjects(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     subject_name = Column(String(255), unique=True, nullable=False)
-
+class StudentUpdateRequest(BaseModel):
+    name: str
+    email: str
 
 class StudentResponse(BaseModel):
     name: str
@@ -149,6 +151,7 @@ def add_subject(subject_name: str, db: Session = Depends(get_db)):
     return new_subject
 
 
+
 # student_information
 @app.get("/students", response_model=List[StudentResponse])
 def get_all_students(db: Session = Depends(get_db)):
@@ -157,3 +160,13 @@ def get_all_students(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No students found")
 
     return [StudentResponse(name=student.name, email=student.email) for student in students]
+
+@app.put("/students/{student_id}", response_model=StudentResponse)
+def update_student(student_id: int, student: StudentUpdateRequest, db: Session = Depends(get_db)):
+    db_student = db.query(StudentInformation).filter(StudentInformation.id == student_id).first()
+    if not db_student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    db_student.name = student.name
+    db_student.email = student.email
+    db.commit()
+    return db_student
