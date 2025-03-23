@@ -9,7 +9,6 @@
 <body>
     <div class="form-container">
         <h2>Sign Up</h2>
-        <form action="signup_action.php" method="post">
         <form id="signupForm">
             <div class="input-group">
                 <label for="username">Username:</label>
@@ -26,42 +25,38 @@
             <div class="input-group">
                 <button type="submit">Sign Up</button>
             </div>
+            <p id="signupMessage"></p>
         </form>
     </div>
-</body>
-        <p id="signupMessage"></p>
-    </div>
-</body>
 
-<script>
-    document.getElementById("signupForm").addEventListener("submit", async function(event) {
-        event.preventDefault(); 
-    
-        const name = document.getElementById("username").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-    
-        try {
-            const response = await fetch("http://127.0.0.1:5000/users", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password })
-            });
-    
-            const result = await response.json();
-            
-            if (response.ok) {
-                document.getElementById("signupMessage").textContent = "Signup successful! Redirecting...";
-                setTimeout(() => window.location.href = "login.html", 2000);
-            } else {
-                document.getElementById("signupMessage").textContent = "Error: " + result.detail;
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/users", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("signupMessage").textContent = "Signup successful! Redirecting...";
+                    setTimeout(() => window.location.href = "login.html", 2000);
+                } else {
+                    document.getElementById("signupMessage").textContent = "Error: " + result.detail;
+                }
+            } catch (error) {
+                document.getElementById("signupMessage").textContent = "Failed to connect to API.";
+                console.error("Error:", error);
             }
-        } catch (error) {
-            document.getElementById("signupMessage").textContent = "Failed to connect to API.";
-            console.error("Error:", error);
-        }
-    });
+        });
     </script>
-
->>>>>>> c0335ac (Alex First Commit Foundation)
+</body>
 </html>
