@@ -13,6 +13,11 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List
+from fastapi import Form
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+from fastapi.responses import HTMLResponse
+from fastapi import Form
 
 # Secret key for JWT
 SECRET_KEY = "MostSecretof_keys!"
@@ -82,7 +87,9 @@ class AvailableSubjects(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     subject_name = Column(String(255), unique=True, nullable=False)
-
+class StudentUpdateRequest(BaseModel):
+    name: str
+    email: str
 
 class StudentResponse(BaseModel):
     name: str
@@ -148,19 +155,7 @@ def add_subject(subject_name: str, db: Session = Depends(get_db)):
     db.refresh(new_subject)
     return new_subject
 
-# student_information
-@app.get("/search_students")
-def search_students(name: str = Query(None), email: str = Query(None), db: Session = Depends(get_db)):
-    query = db.query(StudentInformation)
-    if name:
-        query = query.filter(StudentInformation.name == name)
-    if email:
-        query = query.filter(StudentInformation.email == email)
-    
-    student = query.first()
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-    return student
+
 
 # student_information
 @app.get("/students", response_model=List[StudentResponse])
@@ -170,3 +165,35 @@ def get_all_students(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No students found")
 
     return [StudentResponse(name=student.name, email=student.email) for student in students]
+
+@app.put("/students/{student_id}", response_model=StudentResponse)
+def update_student(student_id: int, student: StudentUpdateRequest, db: Session = Depends(get_db)):
+    db_student = db.query(StudentInformation).filter(StudentInformation.id == student_id).first()
+    if not db_student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    db_student.name = student.name
+    db_student.email = student.email
+    db.commit()
+    return db_student
+
+
+from fastapi import Form
+
+@app.post("/students/{student_id}")
+def update_student_profile(student_id: int, name: str = Form(...), email: str = Form(...), db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    student.name = name
+    student.emagil = email
+    db.commit()
+    return {"message": "Profile updated successfully"}
+
+templates = Jinja2Templates(directory="templates")  
+
+@app.get("/student_info/{student_id}", response_class=HTMLResponse)
+def get_student_info_page(student_id: int, request: Request, db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return templates.TemplateResponse("student_info.html", {"request": request, "student": student}) 
