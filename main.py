@@ -13,17 +13,16 @@ import bcrypt
 import jwt
 import os
 
-# --- Config ---
 SECRET_KEY = "MostSecretof_keys!"
 ALGORITHM = "HS256"
+
 DATABASE_URL = "mysql+mysqlconnector://root:password4swe@localhost:3306/soft_project"
 
-# --- SQLAlchemy setup ---
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
-# --- FastAPI setup ---
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 security = HTTPBearer()
@@ -36,7 +35,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Utility: DB Session ---
 def get_db():
     db = SessionLocal()
     try:
@@ -52,7 +50,6 @@ def get_current_user_email(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.PyJWTError:
         raise HTTPException(status_code=403, detail="Invalid token")
 
-# --- Models ---
 class UserCreate(BaseModel):
     name: str
     email: str
@@ -99,10 +96,9 @@ class StudyPartner(Base):
     status = Column(Enum("pending", "accepted", "declined"), default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# --- Create tables ---
+
 Base.metadata.create_all(bind=engine)
 
-# --- Endpoints ---
 @app.get("/")
 def root():
     return {"message": "FastAPI running"}
