@@ -15,7 +15,6 @@ import os
 SECRET_KEY = "MostSecretof_keys!"
 ALGORITHM = "HS256"
 
-# Database Configuration
 DATABASE_URL = "mysql+mysqlconnector://root:password4swe@localhost:3306/soft_project"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
