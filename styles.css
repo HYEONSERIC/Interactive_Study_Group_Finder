@@ -1,3 +1,10 @@
+* {
+    box-sizing: border-box;
+}
+
+main {
+    padding-top: 75px;
+}
 
 body {
     font-family: 'Arial', sans-serif;
