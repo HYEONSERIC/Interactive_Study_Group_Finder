@@ -197,3 +197,10 @@ def get_student_info_page(student_id: int, request: Request, db: Session = Depen
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     return templates.TemplateResponse("student_info.html", {"request": request, "student": student}) 
+
+@app.get("/get_student_id")
+def get_student_id(email: str, db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.email == email).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return {"id": student.id}
