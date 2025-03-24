@@ -6,6 +6,26 @@ body {
     background-color: #f4f4f4; /* 배경 색상 설정 */
 }
 
+#header {
+  position: fixed;
+  width: 100%;
+  height: 100px;
+  display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+#nav-bar ul {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  list-style-type: none;
+  padding-right: 1rem;
+}
+
+#nav-bar ul li {
+  padding: 0 .5rem 0;
+}
 
 .container {
     max-width: 600px;
