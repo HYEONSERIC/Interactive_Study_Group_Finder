@@ -14,7 +14,7 @@
           <ul>
             <li><a href='/creat_meeting.html' class='nav-link'>Create Meeting</a></li>
             <li><a href='/find_help.html' class='nav-link'>Find Study Help</a></li>
-            <li><a href='/search_study_groups.html' class='nav-link'>Search Study Groups</a></li>
+            <li><a href='./search_users.html' class='nav-link'>Search Study Groups</a></li>
             <li><a class='nav-link' id="profileLink" href="#">Profile</a></li>
             <li><a class='nav-link'href='/about.html'>About Us</a></li>
           </ul>
@@ -39,12 +39,14 @@
         
         const payload = JSON.parse(atob(token.split('.')[1]));
         const email = payload.sub;
-
+        const username = payload.username;
         
         const BASE_API_URL = "http://127.0.0.1:5000";
 
+        const profileLink = document.getElementById("profileLink");
+        profileLink.href = `./view-profile.html?username=${username}`;
         
-        fetch(`${BASE_API_URL}/get_student_id?email=${email}`)
+        /*fetch(`${BASE_API_URL}/get_student_id?email=${email}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Student not found");
@@ -61,7 +63,7 @@
             .catch(error => {
                 console.error("Error fetching student ID:", error);
                 alert("Error loading profile. Please try again.");
-            });
+            });*/
 
         
         document.getElementById("welcomeMessage").textContent = "Login successful! Welcome to Homepage";

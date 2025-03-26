@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Users</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Student & Study Group Search</h1>
+        
+        <div class="search-types">
+            <div class="search-type">
+                <input type="radio" id="student-search" name="search-type" value="student" checked>
+                <label for="student-search">Search Students</label>
+            </div>
+            <div class="search-type">
+                <input type="radio" id="group-search" name="search-type" value="group">
+                <label for="group-search">Search Study Groups</label>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Enter name, email or keyword...">
+            <button id="search-button">Search</button>
+        </div>
+        
+        <div class="error-message" id="error-container">
+            No results found. Please try a different search term.
+        </div>
+        
+        <div class="loading" id="loading-container">
+            <div class="loader"></div>
+            <p>Searching...</p>
+        </div>
+        
+        <div class="results-container" id="results-container">
+            <!-- Results will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            const resultsContainer = document.getElementById('results-container');
+            const errorContainer = document.getElementById('error-container');
+            const loadingContainer = document.getElementById('loading-container');
+            const studentRadio = document.getElementById('student-search');
+            const groupRadio = document.getElementById('group-search');
+            
+            // API base URL - change this to match your server
+            const API_BASE_URL = 'http://127.0.0.1:5000';
+            
+            // Function to search students
+            async function searchStudents(query) {
+                try {
+                    // Show loading indicator
+                    loadingContainer.style.display = 'block';
+                    errorContainer.style.display = 'none';
+                    resultsContainer.innerHTML = '';
+                    
+                    // Fetch all students from the backend
+                    const response = await fetch(`${API_BASE_URL}/students`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch students');
+                    }
+                    
+                    const students = await response.json();
+                    
+                    // Filter students based on search query
+                    const filteredStudents = students.filter(student => 
+                        student.name.toLowerCase().includes(query.toLowerCase()) || 
+                        student.email.toLowerCase().includes(query.toLowerCase())
+                    );
+                    
+                    // Hide loading indicator
+                    loadingContainer.style.display = 'none';
+                    
+                    // Display results or error
+                    if (filteredStudents.length > 0) {
+                        displayStudentResults(filteredStudents);
+                    } else {
+                        errorContainer.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error searching students:', error);
+                    loadingContainer.style.display = 'none';
+                    errorContainer.style.display = 'block';
+                    errorContainer.textContent = 'Error connecting to the server. Please try again later.';
+                }
+            }
+            
+            // Function to search study groups
+            // Note: This is a placeholder as there's no study group endpoint in the provided backend
+            async function searchGroups(query) {
+                try {
+                    loadingContainer.style.display = 'block';
+                    errorContainer.style.display = 'none';
+                    resultsContainer.innerHTML = '';
+                    
+                    // Since there's no study group endpoint, we'll show an appropriate message
+                    setTimeout(() => {
+                        loadingContainer.style.display = 'none';
+                        errorContainer.style.display = 'block';
+                        errorContainer.textContent = 'Study group search functionality is not yet implemented in the backend.';
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('Error searching groups:', error);
+                    loadingContainer.style.display = 'none';
+                    errorContainer.style.display = 'block';
+                    errorContainer.textContent = 'Error connecting to the server. Please try again later.';
+                }
+            }
+            
+            // Function to display student results
+            function displayStudentResults(students) {
+                resultsContainer.innerHTML = '';
+                
+                students.forEach(student => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    
+                    const nameElement = document.createElement('div');
+                    nameElement.className = 'result-name';
+                    nameElement.textContent = student.name;
+                    
+                    const emailElement = document.createElement('div');
+                    emailElement.className = 'result-email';
+                    emailElement.textContent = student.email;
+                    
+                    resultItem.appendChild(nameElement);
+                    resultItem.appendChild(emailElement);
+                    resultsContainer.appendChild(resultItem);
+                });
+            }
+            
+            // Search button click event
+            searchButton.addEventListener('click', function() {
+                const searchTerm = searchInput.value.trim();
+                
+                if (searchTerm.length < 2) {
+                    errorContainer.style.display = 'block';
+                    errorContainer.textContent = 'Please enter at least 2 characters to search.';
+                    return;
+                }
+                
+                if (studentRadio.checked) {
+                    searchStudents(searchTerm);
+                } else if (groupRadio.checked) {
+                    searchGroups(searchTerm);
+                }
+            });
+            
+            // Handle Enter key press in search input
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+            
+            // Optional: Load all students on page load
+            // searchStudents('');
+        });
+    </script>
+</body>
+</html>

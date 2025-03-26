@@ -77,14 +77,19 @@ p {
     display: flex;
     justify-content: flex-end;
     overflow: hidden;
-  }
+}
+
+#header h1 {
+    padding-right: 190px;
+    padding-top: -25px;
+}
   
 #nav-bar ul {
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
     list-style-type: none;
-    padding-right: 1rem;
+    padding-right: 2rem;
   }
   
 #nav-bar ul li {
