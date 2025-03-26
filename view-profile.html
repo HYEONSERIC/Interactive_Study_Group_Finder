@@ -39,16 +39,12 @@
           alert("Error loading profile information. Redirection to homepage");
           window.location.href = "homepage.html";
         } else {
-          alert("Success");
           const BASE_API_URL = "http://127.0.0.1:5000";
           document.getElementById("name").textContent = profile.name;
           editButton = document.getElementById("edit-profile");
           document.getElementById("email").textContent = profile.email;
-          alert(viewer_email);
-          alert(profile.email);
           if (viewer_email == profile.email) {
             editButton.href = `${BASE_API_URL}/student_info/${profile.id}`;
-            alert(`${BASE_API_URL}/student_info/${profile.id}`)
           } else {
             editButton.parentNode.removeChild(editButton)
           }
@@ -62,7 +58,6 @@
       }
       const payload = JSON.parse(atob(token.split('.')[1]));
       const viewer_email = payload.sub;
-      alert(viewer_email);
       
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
