@@ -9,22 +9,18 @@ import bcrypt
 import jwt
 import os
 from fastapi import Query
-from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Depends, Query
-from sqlalchemy.orm import Session
 from typing import List
 from fastapi import Form
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
-from fastapi import Form
 
 # Secret key for JWT
 SECRET_KEY = "MostSecretof_keys!"
 ALGORITHM = "HS256"
 
 # Database Configuration
-DATABASE_URL = "mysql+mysqlconnector://root:chlgustn0425!@localhost:3306/soft_project"
+DATABASE_URL = "mysql+mysqlconnector://root:Iondragonfly23!@localhost:3306/soft_project"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
@@ -94,6 +90,11 @@ class StudentUpdateRequest(BaseModel):
 class StudentResponse(BaseModel):
     name: str
     email: str
+
+class StudentName(BaseModel):
+    name: str
+
+
 # Create Tables (If a table gets deleted this will create them as long there is a connection to the DB.)
 Base.metadata.create_all(bind=engine)
 
@@ -133,7 +134,7 @@ def login_user(request: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     # Generate JWT token
-    token_payload = {"sub": user.email, "exp": datetime.utcnow() + timedelta(hours=1)}
+    token_payload = {"sub": user.email,"username": user.name, "exp": datetime.now() + timedelta(hours=1)}
     token = jwt.encode(token_payload, SECRET_KEY, algorithm=ALGORITHM)
 
     return {"token": token, "message": "Login successful"}
@@ -176,16 +177,13 @@ def update_student(student_id: int, student: StudentUpdateRequest, db: Session =
     db.commit()
     return db_student
 
-
-from fastapi import Form
-
 @app.post("/students/{student_id}")
 def update_student_profile(student_id: int, name: str = Form(...), email: str = Form(...), db: Session = Depends(get_db)):
     student = db.query(StudentInformation).filter(StudentInformation.id == student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     student.name = name
-    student.emagil = email
+    student.email = email
     db.commit()
     return {"message": "Profile updated successfully"}
 
@@ -204,3 +202,19 @@ def get_student_id(email: str, db: Session = Depends(get_db)):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     return {"id": student.id}
+
+@app.get("/view-profile/{username}}", response_class=HTMLResponse)
+def get_view_profile_page(username: str, request: Request, db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.name == username).first()
+    if not student:
+        raise HTTPException(status_code=406, detail="Student not found")
+    return templates.TemplateResponse("view-profile.html", {"request": request, "student": student}) 
+
+@app.post("/view-profile")
+def get_profile_info(student: StudentName, db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.name == student.name).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    name = student.name
+    email = student.email   
+    return student
