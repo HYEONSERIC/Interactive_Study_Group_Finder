@@ -121,6 +121,10 @@
                 resultsContainer.innerHTML = '';
                 
                 students.forEach(student => {
+                    const linkItem = document.createElement('a');
+                    linkItem.id = "search-users-result-link";
+                    linkItem.href = `./view-profile.html?username=${student.name}`;
+
                     const resultItem = document.createElement('div');
                     resultItem.className = 'result-item';
                     
@@ -134,7 +138,8 @@
                     
                     resultItem.appendChild(nameElement);
                     resultItem.appendChild(emailElement);
-                    resultsContainer.appendChild(resultItem);
+                    linkItem.appendChild(resultItem);
+                    resultsContainer.appendChild(linkItem);
                 });
             }
             
