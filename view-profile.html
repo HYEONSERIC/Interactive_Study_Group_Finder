@@ -3,19 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <title>Student Profile</title>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div id="profile-title">
-      <h1 id="username">[None]</h1><h1>'s Profile!</h1>
+      <div id="profile-title"><h1 id="username">[None]</h1><h1>'s Profile!</h1></div>
     </div>
-    <form id="profile-details">
-      <a id="edit-profile">Edit</a>
+    <div id="profile-details">
       <div id="left-side-profile">
+        <a id="edit-profile">Edit</a><br/>
         <label for="name">Name:</label>
-        <p id="name">{{username}}</p><br/>
+        <p id="profile-name">{{username}}</p><br/>
 
         <label for="email">Email:</label>
-        <p id="email"></p><br />
+        <p id="profile-email"></p><br />
         
         <label for="friends-section-profile">Friends</label>
         <ul id="friends-section-profile"></ul>
@@ -24,13 +25,13 @@
         <label for="group-section-profile">Your Groups</label>
         <ul id="group-section-profile"></ul>
       </div>
-    </form>
+    </div>
     <script>
       async function get_profile_data(pname, viewer_email) {
         const response = await fetch("http://127.0.0.1:5000/view-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ "name":pname })
+          body: JSON.stringify({ "query_str":pname })
         });
   
         profile = await response.json();
@@ -40,9 +41,9 @@
           window.location.href = "homepage.html";
         } else {
           const BASE_API_URL = "http://127.0.0.1:5000";
-          document.getElementById("name").textContent = profile.name;
+          document.getElementById("profile-name").textContent = profile.name;
           editButton = document.getElementById("edit-profile");
-          document.getElementById("email").textContent = profile.email;
+          document.getElementById("profile-email").textContent = profile.email;
           if (viewer_email == profile.email) {
             editButton.href = `${BASE_API_URL}/student_info/${profile.id}`;
           } else {

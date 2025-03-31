@@ -99,3 +99,23 @@ p {
 #nav-bar ul li a {
     color: darkblue;
   }
+
+#profile-title {
+    display: flex;
+}
+
+#profile-details {
+    display: flex;
+}
+
+#left-side-profile {
+    width: 50vw;
+}
+#right-side-profile {
+    width: 50vw;
+}
+
+#left-side-profile p {
+    display: flex;
+    justify-content: flex-start;
+}
