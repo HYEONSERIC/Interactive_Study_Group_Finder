@@ -7,7 +7,7 @@ To use this project:
 run the mysql_setup.txt file as a script in an empty mySQL database.
 Change database link in main.py if needed
 Download most recent "Python" code interpreter.
-open command window
+Once python is downloaded open command window.
 pip install:
     fastapi,
     sqlalchemy,
