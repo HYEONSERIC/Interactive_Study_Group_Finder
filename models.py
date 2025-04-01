@@ -1,6 +1,5 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Time, Enum, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Time, Enum, DateTime
 from datetime import datetime
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from db import Base
 
 class StudentInformation(Base):
@@ -53,3 +52,23 @@ class GroupMember(Base):
     student_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
     joined_at = Column(DateTime, default=datetime.utcnow)
     role = Column(String(50), default="member")  # Optional: "admin", "member", etc.
+
+class MeetingSchedule(Base):
+    __tablename__ = "meeting_schedule"
+
+    id = Column(Integer, primary_key=True, index=True)
+    host_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(String(1000))
+    meeting_time = Column(DateTime, nullable=False)
+    room_name = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class MeetingInvite(Base):
+    __tablename__ = "meeting_invites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    meeting_id = Column(Integer, ForeignKey("meeting_schedule.id"), nullable=False)
+    invitee_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
+    invited_at = Column(DateTime, default=datetime.utcnow)
+    status = Column(Enum("pending", "accepted", "declined"), default="pending")

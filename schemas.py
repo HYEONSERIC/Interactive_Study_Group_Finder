@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from datetime import datetime
 
 # User Model #
 #this is where each table from the database is defined. these will be wonky and throw errors and may
@@ -40,3 +40,21 @@ class PartnerInfo(BaseModel):
 #search
 class StudentName(BaseModel):
     name: str
+
+#student info
+class StudentResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+
+    class Config:
+        orm_mode = True
+
+class MeetingCreateRequest(BaseModel):
+    title: str
+    description: str
+    meeting_time: datetime  # Format: "2025-04-03T15:30:00"
+
+class InviteUserRequest(BaseModel):
+    meeting_id: int
+    invitee_email: str

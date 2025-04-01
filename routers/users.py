@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Form
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
 from models import StudentInformation
 from schemas import UserCreate, LoginRequest
 from datetime import datetime, timedelta
-from pydantic import BaseModel
 import bcrypt
 import jwt
-from db import SECRET_KEY, ALGORITHM
+from db import SECRET_KEY, ALGORITHM, get_current_user_email
 
 router = APIRouter()
 
@@ -42,3 +40,13 @@ def login_user(request: LoginRequest, db: Session = Depends(get_db)):
     token = jwt.encode(token_payload, SECRET_KEY, algorithm=ALGORITHM)
 
     return {"token": token, "message": "Login successful"}
+
+@router.get("/me")
+def get_current_user_data(
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user_email)
+):
+    user = db.query(StudentInformation).filter(StudentInformation.email == current_user_email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"id": user.id, "name": user.name, "email": user.email}
