@@ -1,140 +1,37 @@
-from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Time, Enum, DateTime
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime, timedelta
-from pydantic import BaseModel
-import mysql.connector
-import bcrypt
-import jwt
-import os
+from fastapi.templating import Jinja2Templates
+from db import engine, Base
+from routers import studentinfo, friendslist, subjects, users  # Import your routers
+from fastapi.templating import Jinja2Templates
 
-# Secret key for JWT
-SECRET_KEY = "MostSecretof_keys!"
-ALGORITHM = "HS256"
+templates = Jinja2Templates(directory="templates")
 
-# Database Configuration
-DATABASE_URL = "mysql+mysqlconnector://root:pass4sql@localhost:3306/soft_project"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-Base = declarative_base()
-
-# FastAPI Instance
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows requests from any domain (for testing)
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
-)
-
-# Database Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# User Model #
-#this is where each table from the database is defined. these will be wonky and throw errors and may
-#need definition added like the UserCreate(BaseModel). The javascript to sql conversion gets confused
-#so that was added to get uniformity when creating a user. 
-
-class UserCreate(BaseModel):
-    name: str
-    email: str
-    password: str
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-class StudentInformation(Base):
-    __tablename__ = "student_information"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-
-class StudentAvailability(Base):
-    __tablename__ = "student_availability"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    student_id = Column(Integer, ForeignKey("student_information.id"), nullable=False) 
-    day_of_week = Column(Enum("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"), nullable=False)
-    start_time = Column(Time, nullable=False)
-    end_time = Column(Time, nullable=False)
-    timezone = Column(String(50), default="UTC")
-
-class AvailableSubjects(Base):
-    __tablename__ = "available_subjects"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    subject_name = Column(String(255), unique=True, nullable=False)
-
-# Create Tables (If a table gets deleted this will create them as long there is a connection to the DB.)
+# Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
 
-#               #
-# API ENDPOINTS #
-#               #
+# FastAPI instance
+app = FastAPI()
 
-# TESTING
-# API Endpoint - Test Connection
+# Enable CORS (for frontend access, like your HTML pages)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all for development; restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Template directory (only needed if you're using Jinja2 templates)
+templates = Jinja2Templates(directory="templates")
+
+# Mount routers with optional prefixes
+app.include_router(studentinfo.router)
+app.include_router(friendslist.router)
+app.include_router(subjects.router)
+app.include_router(users.router)
+
+# Optional root test endpoint
 @app.get("/")
-def read_root():
-    return {"message": "FastAPI is running and connected to MySQL"}
-
-#USER INFORMATION
-# API Endpoint - Get Users
-@app.get("/users")
-def get_users(db: Session = Depends(get_db)):
-    users = db.query(StudentInformation).all()
-    return users
-
-# API Endpoint - Create User
-@app.post("/users")
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    password_hashed = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    user = StudentInformation(name=user.name, email=user.email, password_hash=password_hashed)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return {"message": "User created successfully"}
-
-#LOGIN
-# API Endpoint - Login verification
-@app.post("/login") 
-def login_user(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(StudentInformation).filter(StudentInformation.email == request.email).first()
-    if not user or not bcrypt.checkpw(request.password.encode("utf-8"), user.password_hash.encode("utf-8")):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    # Generate JWT token
-    token_payload = {"sub": user.email, "exp": datetime.utcnow() + timedelta(hours=1)}
-    token = jwt.encode(token_payload, SECRET_KEY, algorithm=ALGORITHM)
-
-    return {"token": token, "message": "Login successful"}
-
-
-# SUBJECTS
-# API Endpoint - all subjects in available_subjects
-@app.get("/subjects")
-def get_subjects(db: Session = Depends(get_db)):
-    subjects = db.query(AvailableSubjects).all()
-    return subjects
-
-# API Endpoint - add subject
-@app.post("/subjects")
-def add_subject(subject_name: str, db: Session = Depends(get_db)):
-    new_subject = AvailableSubjects(subject_name=subject_name)
-    db.add(new_subject)
-    db.commit()
-    db.refresh(new_subject)
-    return new_subject
+def root():
+    return {"message": "Study Buddy API is running"} 

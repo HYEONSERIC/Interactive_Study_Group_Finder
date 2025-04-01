@@ -1,37 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homepage</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h2 id="welcomeMessage">Welcome to Homepage</h2>
-        <p>You have successfully logged in.</p>
-        <button onclick="logout()">Logout</button>
-    </div>
-</body>
+  <header id="header">
+    <h1 class="header-title">Study Group Finder</h1>
+    <div class="empty"></div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="creat_meeting.html" class="nav-link">Create Meeting</a></li>
+        <li><a href="find_help.html" class="nav-link">Find Study Help</a></li>
+        <li><a href="search_users.html" class="nav-link">Search Study Groups</a></li>
+        <li><a href="#" class="nav-link" id="profileLink">Profile</a></li>
+        <li><a href="friends.html" class="nav-link">Friends</a></li>
+        <li><a href="about.html" class="nav-link">About Us</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<script>
-    // Check if user is logged in
+  <main>
+    <div class="container" id="message_display">
+      <h2 id="welcomeMessage">Welcome to Homepage</h2>
+      <p>You have successfully logged in.</p>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </main>
+
+ <script>
     const token = localStorage.getItem("token");
 
     if (!token) {
-        alert("Unauthorized access! Redirecting to login.");
-        window.location.href = "login.html"; // Redirect to login if not logged in
+      alert("Unauthorized access! Redirecting to login.");
+      window.location.href = "login.html";
     } else {
-        // Display welcome message
-        document.getElementById("welcomeMessage").textContent = "Login successful! Welcome to Homepage";
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const email = payload.sub;
+
+      const BASE_API_URL = "http://127.0.0.1:5000";
+
+      fetch(`${BASE_API_URL}/get_student_id?email=${email}`)
+        .then(response => {
+          if (!response.ok) throw new Error("Student not found");
+          return response.json();
+        })
+        .then(data => {
+          const studentId = data.id;
+          document.getElementById("profileLink").href = `${BASE_API_URL}/student_info/${studentId}`;
+        })
+        .catch(error => {
+          console.error("Error fetching student ID:", error);
+          alert("Error loading profile. Please try again.");
+        });
+
+      document.getElementById("welcomeMessage").textContent = "Login successful! Welcome to Homepage";
     }
 
-    // Logout function
     function logout() {
-        localStorage.removeItem("token"); // Remove token
-        alert("You have been logged out.");
-        window.location.href = "login.html"; // Redirect to login page
+      localStorage.removeItem("token");
+      alert("You have been logged out.");
+      window.location.href = "login.html";
     }
-</script>
+  </script>
 
+</body>
 </html>
+

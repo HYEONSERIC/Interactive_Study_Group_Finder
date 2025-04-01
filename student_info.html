@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="profile-title">
+      <h1 id="username">Name</h1><h1>'s Profile!</h1>
+    </div>
+    <form id="profile-details">
+      <a id="edit-profile">Edit</a>
+      <div id="left-side-profile">
+        <label for="name">Name:</label>
+        <p id="name">{{username}}</p><br/>
+
+        <label for="email">Email:</label>
+        <p id="email"></p><br />
+        
+        <label for="friends-section-profile">Friends</label>
+        <ul id="friends-section-profile"></ul>
+      </div>
+      <div id="right-side-profile">
+        <label for="group-section-profile">Your Groups</label>
+        <ul id="group-section-profile"></ul>
+      </div>
+    </form>
+    
+    <script>
+      const API_URL = "http://127.0.0.1:5000";
+      const token = localStorage.getItem("token");
+    
+      if (!token) {
+        alert("Unauthorized access! Redirecting to login.");
+        window.location.href = "login.html";
+      }
+    
+      // Decode token to get current user's email
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const viewer_email = payload.sub;
+    
+      // Get user_id from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const user_id = urlParams.get("user_id");
+    
+      if (!user_id) {
+        alert("No user selected. Redirecting to homepage.");
+        window.location.href = "homepage.html";
+      }
+    
+      async function get_profile_data(user_id, viewer_email) {
+        try {
+          const response = await fetch(`${API_URL}/student_info/${user_id}`, {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            alert("Error loading profile info. Redirecting...");
+            window.location.href = "homepage.html";
+            return;
+          }
+    
+          const profile = await response.json();
+          document.getElementById("name").textContent = profile.name;
+          document.getElementById("email").textContent = profile.email;
+    
+          const editButton = document.getElementById("edit-profile");
+    
+          if (viewer_email === profile.email) {
+            editButton.href = `${API_URL}/student_info/${user_id}`;
+          } else {
+            editButton.remove();
+          }
+    
+        } catch (error) {
+          console.error("Fetch error:", error);
+          alert("Something went wrong. Redirecting...");
+          window.location.href = "homepage.html";
+        }
+      }
+    
+      window.onload = function () {
+        get_profile_data(user_id, viewer_email);
+      };
+    </script>
