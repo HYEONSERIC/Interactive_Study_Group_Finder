@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Schedule a Meeting</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Schedule a Study Group Meeting</h1>
+
+    <section>
+        <h2>Create Meeting</h2>
+        <form id="meeting-form">
+            <label>Title:</label><br>
+            <input type="text" id="title" required><br><br>
+
+            <label>Description:</label><br>
+            <textarea id="description" required></textarea><br><br>
+
+            <label>Meeting Time:</label><br>
+            <input type="datetime-local" id="meeting-time" required><br><br>
+
+            <button type="submit">Schedule Meeting</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <section>
+        <h2>Invite to Meeting</h2>
+        <form id="invite-form">
+            <label>Meeting ID:</label><br>
+            <input type="number" id="meeting-id" required><br><br>
+
+            <label>Invitee Email:</label><br>
+            <input type="email" id="invitee-email" required><br><br>
+
+            <button type="submit">Send Invite</button>
+        </form>
+    </section>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Unauthorized. Redirecting to login.");
+            window.location.href = "login.html";
+        }
+
+        document.getElementById("meeting-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const meetingTime = document.getElementById("meeting-time").value;
+
+            const response = await fetch(`${API_URL}/schedule-meeting`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: title,
+                    description: description,
+                    meeting_time: meetingTime
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(`Meeting created! ID: ${data.meeting_id}`);
+            } else {
+                alert(data.detail || "Failed to schedule meeting.");
+            }
+        });
+
+        document.getElementById("invite-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const meetingId = document.getElementById("meeting-id").value;
+            const inviteeEmail = document.getElementById("invitee-email").value;
+
+            const response = await fetch(`${API_URL}/invite-to-meeting`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    meeting_id: meetingId,
+                    invitee_email: inviteeEmail
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert("Invite sent!");
+            } else {
+                alert(data.detail || "Failed to send invite.");
+            }
+        });
+    </script>
+</body>
+</html>

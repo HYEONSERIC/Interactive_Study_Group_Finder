@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Friends Management</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-top: 40px; }
+    ul { list-style-type: none; padding: 0; }
+    li { margin-bottom: 10px; }
+    button { margin-left: 10px; }
+  </style>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h1>Friends</h1>
+
+  <h2>Send Friend Request by Email</h2>
+  <form id="sendRequestForm">
+    <input type="email" id="receiver_email" placeholder="Enter friend's email" required />
+    <button type="submit">Send Request</button>
+  </form>
+  <p id="requestMessage"></p>
+
+  <h2>Accepted Friends</h2>
+  <ul id="acceptedFriendsList"></ul>
+
+  <h2>Pending Friend Requests</h2>
+  <ul id="pendingRequestsList"></ul>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000";
+    const token = localStorage.getItem("token");
+
+    // Send Friend Request by Email
+    document.getElementById("sendRequestForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const receiverEmail = document.getElementById("receiver_email").value;
+
+      try {
+        const res = await fetch(`${API_URL}/partners/request-by-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ receiver_email: receiverEmail })
+        });
+
+        const data = await res.json();
+        document.getElementById("requestMessage").innerText = data.message || data.detail;
+        loadFriends();
+      } catch (err) {
+        document.getElementById("requestMessage").innerText = "Error sending request.";
+      }
+    });
+
+    async function loadFriends() {
+      const acceptedList = document.getElementById("acceptedFriendsList");
+      acceptedList.innerHTML = "";
+
+      try {
+        const res = await fetch(`${API_URL}/partners`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const friends = await res.json();
+        friends.forEach(friend => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            ${friend.name} (${friend.email})
+            <button onclick="removeFriend(${friend.id})">Remove</button>
+          `;
+          acceptedList.appendChild(li);
+        });
+      } catch {
+        acceptedList.innerHTML = "<li>Error loading friends</li>";
+      }
+
+      const pendingList = document.getElementById("pendingRequestsList");
+      pendingList.innerHTML = "";
+
+      try {
+        const res = await fetch(`${API_URL}/partners/pending`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const pending = await res.json();
+        pending.forEach(req => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            ${req.name} (${req.email})
+            <button onclick="respondRequest(${req.id}, 'accept')">Accept</button>
+            <button onclick="respondRequest(${req.id}, 'decline')">Decline</button>
+          `;
+          pendingList.appendChild(li);
+        });
+      } catch {
+        pendingList.innerHTML = "<li>Error loading pending requests</li>";
+      }
+    }
+
+    async function removeFriend(friendId) {
+      try {
+        const res = await fetch(`${API_URL}/partners/${friendId}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadFriends();
+      } catch {
+        alert("Failed to remove friend.");
+      }
+    }
+
+    async function respondRequest(partnerId, action) {
+      try {
+        const res = await fetch(`${API_URL}/partners/respond`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ partner_id: partnerId, action })
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadFriends();
+      } catch {
+        alert("Failed to respond to request.");
+      }
+    }
+
+    loadFriends();
+  </script>
+
+</body>
+</html>
