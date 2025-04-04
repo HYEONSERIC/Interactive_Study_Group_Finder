@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Time, Enum, DateTime
 from datetime import datetime
-from db import Base
+from study_buddy_api.db import Base
 
 class StudentInformation(Base):
     __tablename__ = "student_information"
@@ -17,7 +17,7 @@ class StudentAvailability(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     student_id = Column(Integer, ForeignKey("student_information.id"), nullable=False) 
-    day_of_week = Column(Enum("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"), nullable=False)
+    day_of_week = Column(Enum("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", name="day_of_week_enum"), nullable=False)
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
     timezone = Column(String(50), default="UTC")
@@ -28,12 +28,18 @@ class AvailableSubjects(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     subject_name = Column(String(255), unique=True, nullable=False)
 
+class StudentSubjects(Base):
+    __tablename__ = "student_subjects"
+
+    student_id = Column(Integer, ForeignKey("student_information.id"), primary_key=True)
+    subject_id = Column(Integer, ForeignKey("available_subjects.id"), primary_key=True)
+
 class StudyPartner(Base):
     __tablename__ = "study_partners"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     requester_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
     receiver_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
-    status = Column(Enum("pending", "accepted", "declined"), default="pending")
+    status = Column(Enum("pending", "accepted", "declined", name="friend_status"), default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class StudyGroup(Base):
@@ -71,4 +77,4 @@ class MeetingInvite(Base):
     meeting_id = Column(Integer, ForeignKey("meeting_schedule.id"), nullable=False)
     invitee_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
     invited_at = Column(DateTime, default=datetime.utcnow)
-    status = Column(Enum("pending", "accepted", "declined"), default="pending")
+    status = Column(Enum("pending", "accepted", "declined", name="invite_status"), default="pending")

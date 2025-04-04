@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from db import get_db
-from models import StudentInformation
-from schemas import UserCreate, LoginRequest
+from study_buddy_api.db import get_db,  SECRET_KEY, ALGORITHM, get_current_user_email
+from study_buddy_api.models import StudentInformation
+from study_buddy_api.schemas import UserCreate, LoginRequest
 from datetime import datetime, timedelta
 import bcrypt
 import jwt
-from db import SECRET_KEY, ALGORITHM, get_current_user_email
 
 router = APIRouter()
 

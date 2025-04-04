@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from db import get_db
-from models import AvailableSubjects
+from study_buddy_api.db import get_db
+from study_buddy_api.models import AvailableSubjects
 
 router = APIRouter()
 

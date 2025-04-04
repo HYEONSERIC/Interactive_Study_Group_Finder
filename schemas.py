@@ -1,11 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-# User Model #
-#this is where each table from the database is defined. these will be wonky and throw errors and may
-#need definition added like the UserCreate(BaseModel). The javascript to sql conversion gets confused
-#so that was added to get uniformity when creating a user. 
-
 #login/registration
 class UserCreate(BaseModel):
     name: str

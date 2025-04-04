@@ -1,11 +1,9 @@
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from db import get_db
-from models import StudentInformation
+from study_buddy_api.db import get_db, get_current_user_email 
+from study_buddy_api.models import StudentInformation, MeetingInvite, MeetingSchedule
 from datetime import datetime
-from models import MeetingInvite, MeetingSchedule
-from schemas import MeetingCreateRequest, InviteUserRequest
-from db import get_current_user_email     
+from study_buddy_api.schemas import MeetingCreateRequest, InviteUserRequest    
 
 router = APIRouter()
 
