@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Group</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h2>Create New Study Group</h2>
+  <form id="createGroupForm">
+    <label>Group Name:
+      <input type="text" name="name" required />
+    </label><br />
+
+    <button type="submit">Create Group</button>
+  </form>
+
+  <button onclick="history.back()">Back</button>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    document.getElementById("createGroupForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const payload = {
+        name: formData.get("name")
+      };
+
+      const res = await fetch("http://127.0.0.1:8000/groups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert("✅ Group created successfully!");
+        window.location.href = "your_group.html";
+      } else {
+        const error = await res.text();
+        alert("❌ Failed to create group: " + error);
+      }
+    });
+  </script>
+</body>
+</html>

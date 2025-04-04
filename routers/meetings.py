@@ -42,6 +42,24 @@ def invite_user(invite: InviteUserRequest, db: Session = Depends(get_db), curren
     db.commit()
     return {"message": "User invited"}
 
+@router.post("/schedule-meeting")
+def schedule_meeting(meeting: MeetingCreateRequest, db: Session = Depends(get_db), current_user_email: str = Depends(get_current_user_email)):
+    host = db.query(StudentInformation).filter(StudentInformation.email == current_user_email).first()
+
+    new_meeting = MeetingSchedule(
+        host_id=host.id,
+        group_id=meeting.group_id,  # ✅ 추가
+        title=meeting.title,
+        description=meeting.description,
+        meeting_time=meeting.meeting_time,
+        room_name=f"studybuddy-room-{host.id}-{int(datetime.utcnow().timestamp())}"
+    )
+    db.add(new_meeting)
+    db.commit()
+    db.refresh(new_meeting)
+    return {"message": "Meeting scheduled", "meeting_id": new_meeting.id}
+
+
 @router.get("/my-meeting-invites")
 def get_meeting_invites(
     db: Session = Depends(get_db),

@@ -47,6 +47,10 @@
             window.location.href = "login.html";
         }
 
+        // URL에서 group_id 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get("group_id");
+
         document.getElementById("meeting-form").addEventListener("submit", async function (e) {
             e.preventDefault();
             const title = document.getElementById("title").value;
@@ -62,13 +66,15 @@
                 body: JSON.stringify({
                     title: title,
                     description: description,
-                    meeting_time: meetingTime
+                    meeting_time: meetingTime,
+                    group_id: groupId  // ✅ group_id 포함
                 })
             });
 
             const data = await response.json();
             if (response.ok) {
                 alert(`Meeting created! ID: ${data.meeting_id}`);
+                window.location.href = `group_detail.html?group_id=${groupId}`;
             } else {
                 alert(data.detail || "Failed to schedule meeting.");
             }

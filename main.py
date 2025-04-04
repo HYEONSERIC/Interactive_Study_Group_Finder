@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from db import engine, Base
 from routers import studentinfo, friendslist, subjects, users, meetings  # Import your routers
 from fastapi.templating import Jinja2Templates
-
+from routers import groups
 templates = Jinja2Templates(directory="templates")
 
 # Create tables if they don't exist
@@ -31,7 +31,7 @@ app.include_router(friendslist.router)
 app.include_router(subjects.router)
 app.include_router(users.router)
 app.include_router(meetings.router)
-
+app.include_router(groups.router)
 # Optional root test endpoint
 @app.get("/")
 def root():
