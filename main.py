@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from study_buddy_api.db import engine, Base 
-from study_buddy_api.routers import studentinfo, friendslist, subjects, users, meetings  # Import your routers
+from db import engine, Base 
+from routers import studentinfo, friendslist, subjects, users, meetings, groups  # Import your routers
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="templates")
@@ -31,6 +31,7 @@ app.include_router(friendslist.router)
 app.include_router(subjects.router)
 app.include_router(users.router)
 app.include_router(meetings.router)
+app.include_router(groups.router)
 
 # Optional root test endpoint
 @app.get("/")

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Time, Enum, DateTime
 from datetime import datetime
-from study_buddy_api.db import Base
+from db import Base
 
 class StudentInformation(Base):
     __tablename__ = "student_information"
@@ -64,6 +64,7 @@ class MeetingSchedule(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     host_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
+    subject_id = Column(Integer, ForeignKey("available_subjects.id"), nullable=True)  # ✅ add this
     title = Column(String(255), nullable=False)
     description = Column(String(1000))
     meeting_time = Column(DateTime, nullable=False)

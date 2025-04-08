@@ -1,8 +1,10 @@
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from study_buddy_api.db import get_db
-from study_buddy_api.models import AvailableSubjects
+from sqlalchemy.exc import IntegrityError
+from db import get_db
+from models import AvailableSubjects
+from schemas import SubjectCreate
 
 router = APIRouter()
 
@@ -15,9 +17,13 @@ def get_subjects(db: Session = Depends(get_db)):
 
 # API Endpoint - add subject
 @router.post("/subjects")
-def add_subject(subject_name: str, db: Session = Depends(get_db)):
-    new_subject = AvailableSubjects(subject_name=subject_name)
+def add_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
+    new_subject = AvailableSubjects(subject_name=subject.subject_name)
     db.add(new_subject)
-    db.commit()
-    db.refresh(new_subject)
+    try:
+        db.commit()
+        db.refresh(new_subject)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Subject already exists")
     return new_subject

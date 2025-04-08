@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-#login/registration
+# login/registration
 class UserCreate(BaseModel):
     name: str
     email: str
@@ -11,7 +11,7 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-#friend requests
+# friend requests
 class StudentUpdateRequest(BaseModel):
     name: str
     email: str
@@ -32,11 +32,11 @@ class PartnerInfo(BaseModel):
     name: str
     email: str
 
-#search
+# search
 class StudentName(BaseModel):
     name: str
 
-#student info
+# student info
 class StudentResponse(BaseModel):
     id: int
     name: str
@@ -45,11 +45,37 @@ class StudentResponse(BaseModel):
     class Config:
         orm_mode = True
 
+# meetings
 class MeetingCreateRequest(BaseModel):
     title: str
     description: str
-    meeting_time: datetime  # Format: "2025-04-03T15:30:00"
+    meeting_time: datetime
+    subject_name: str
 
 class InviteUserRequest(BaseModel):
-    meeting_id: int
+    meeting_title: str
     invitee_email: str
+
+class MeetingResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    meeting_time: datetime
+    room_name: str
+
+    class Config:
+        orm_mode = True
+
+# group
+class GroupCreate(BaseModel):
+    name: str  
+
+class GroupResponse(BaseModel):
+    id: int
+    name: str 
+
+    class Config:
+        orm_mode = True
+
+class SubjectCreate(BaseModel):
+    subject_name: str

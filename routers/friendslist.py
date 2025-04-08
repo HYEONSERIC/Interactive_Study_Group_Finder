@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from study_buddy_api.db import get_db, SECRET_KEY, ALGORITHM
-from study_buddy_api.models import StudentInformation, StudyPartner
+from db import get_db, SECRET_KEY, ALGORITHM
+from models import StudentInformation, StudyPartner
 from typing import List
 import jwt
-from study_buddy_api.schemas import StudentResponse, EmailPartnerRequest, PartnerResponse, PartnerInfo
+from schemas import StudentResponse, EmailPartnerRequest, PartnerResponse, PartnerInfo
 
 router = APIRouter()
 security = HTTPBearer()

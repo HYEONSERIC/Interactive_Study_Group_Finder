@@ -1,88 +1,104 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Student Profile</title>
-    <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-    <div id="profile-title">
-      <h1 id="username">Name</h1><h1>'s Profile!</h1>
-    </div>
-    <form id="profile-details">
-      <a id="edit-profile">Edit</a>
-      <div id="left-side-profile">
-        <label for="name">Name:</label>
-        <p id="name">{{username}}</p><br/>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Info</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <div class="form-container">
+      <h2>Your Profile</h2>
 
-        <label for="email">Email:</label>
-        <p id="email"></p><br />
-        
-        <label for="friends-section-profile">Friends</label>
-        <ul id="friends-section-profile"></ul>
+      <div class="input-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Enter your name" />
       </div>
-      <div id="right-side-profile">
-        <label for="group-section-profile">Your Groups</label>
-        <ul id="group-section-profile"></ul>
+
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" />
       </div>
-    </form>
-    
-    <script>
-      const API_URL = "http://127.0.0.1:5000";
+
+      <div class="input-group">
+        <button id="update-profile">Update Profile</button>
+      </div>
+
+      <div id="message" class="success-message" style="display:none;"></div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
       const token = localStorage.getItem("token");
-    
+      const nameInput = document.getElementById("name");
+      const emailInput = document.getElementById("email");
+      const messageBox = document.getElementById("message");
+      const updateButton = document.getElementById("update-profile");
+
+      let studentId = null;
+
       if (!token) {
-        alert("Unauthorized access! Redirecting to login.");
+        alert("You must be logged in to view this page.");
         window.location.href = "login.html";
+        return;
       }
-    
-      // Decode token to get current user's email
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const viewer_email = payload.sub;
-    
-      // Get user_id from the URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const user_id = urlParams.get("user_id");
-    
-      if (!user_id) {
-        alert("No user selected. Redirecting to homepage.");
-        window.location.href = "homepage.html";
-      }
-    
-      async function get_profile_data(user_id, viewer_email) {
-        try {
-          const response = await fetch(`${API_URL}/student_info/${user_id}`, {
-            headers: {
-              "Authorization": `Bearer ${token}`
-            }
-          });
-    
-          if (!response.ok) {
-            alert("Error loading profile info. Redirecting...");
-            window.location.href = "homepage.html";
-            return;
-          }
-    
-          const profile = await response.json();
-          document.getElementById("name").textContent = profile.name;
-          document.getElementById("email").textContent = profile.email;
-    
-          const editButton = document.getElementById("edit-profile");
-    
-          if (viewer_email === profile.email) {
-            editButton.href = `${API_URL}/student_info/${user_id}`;
-          } else {
-            editButton.remove();
-          }
-    
-        } catch (error) {
-          console.error("Fetch error:", error);
-          alert("Something went wrong. Redirecting...");
-          window.location.href = "homepage.html";
+
+      // Fetch current user data
+      fetch("http://localhost:5000/me", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
         }
-      }
-    
-      window.onload = function () {
-        get_profile_data(user_id, viewer_email);
-      };
-    </script>
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch user data.");
+        return res.json();
+      })
+      .then(data => {
+        nameInput.value = data.name;
+        emailInput.value = data.email;
+        studentId = data.id; // Save ID for update
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("Could not load profile info. Try logging in again.");
+        window.location.href = "login.html";
+      });
+
+      // Update button click handler
+      updateButton.addEventListener("click", () => {
+        if (!studentId) return;
+
+        const updatedName = nameInput.value.trim();
+        const updatedEmail = emailInput.value.trim();
+
+        fetch(`http://localhost:5000/students/${studentId}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: updatedName,
+            email: updatedEmail
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to update profile.");
+          return res.json();
+        })
+        .then(data => {
+          messageBox.textContent = "Profile updated successfully.";
+          messageBox.style.display = "block";
+        })
+        .catch(err => {
+          console.error("Update error:", err);
+          alert("Failed to update profile.");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

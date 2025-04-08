@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
-from study_buddy_api.db import get_db
-from study_buddy_api.models import StudentInformation
-from study_buddy_api.schemas import StudentResponse, StudentUpdateRequest, StudentName
+from db import get_db
+from models import StudentInformation
+from schemas import StudentResponse, StudentUpdateRequest, StudentName
 from typing import List
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
