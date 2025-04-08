@@ -6,9 +6,30 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h2>Your Study Groups</h2>
-  <ul id="groupList"></ul>
-  <button onclick="location.href='homepage.html'">Back to Home</button>
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="create_group.html">Create Group</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2>Your Study Groups</h2>
+        <div id="groupList" class="list-container">
+          Loading your groups...
+        </div>
+        <div class="input-group">
+          <button onclick="location.href='homepage.html'" class="btn btn-secondary">Back to Home</button>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script>
     const token = localStorage.getItem("token");
@@ -23,20 +44,30 @@
     })
     .then(res => res.json())
     .then(groups => {
-      const list = document.getElementById("groupList");
+      const groupList = document.getElementById("groupList");
+      groupList.innerHTML = "";
+
       if (groups.length === 0) {
-        list.innerHTML = "<li>You are not part of any groups.</li>";
+        groupList.innerHTML = "<p>You are not part of any groups.</p>";
       } else {
         groups.forEach(group => {
-          const li = document.createElement("li");
-          li.innerHTML = `<a href="group_detail.html?group_id=${group.id}">${group.name}</a>`;
-          list.appendChild(li);
+          const card = document.createElement("div");
+          card.classList.add("card");
+
+          card.innerHTML = `
+            <div class="card-header">
+              <span class="card-title">${group.name}</span>
+              <a href="group_detail.html?group_id=${group.id}" class="btn">View</a>
+            </div>
+          `;
+
+          groupList.appendChild(card);
         });
       }
     })
     .catch(err => {
       console.error(err);
-      alert("Failed to load groups.");
+      document.getElementById("groupList").innerHTML = "<p>Failed to load groups.</p>";
     });
   </script>
 </body>

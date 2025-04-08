@@ -6,10 +6,28 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h2>Join a Study Group</h2>
-  <div id="groupList">Loading groups...</div>
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="your_group.html">Your Groups</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  <button onclick="window.location.href='homepage.html'">Back</button>
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2>Join a Study Group</h2>
+        <div id="groupList" class="list-container">Loading groups...</div>
+        <div class="input-group">
+          <button onclick="window.location.href='homepage.html'" class="btn">Back</button>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script>
     const token = localStorage.getItem("token");
@@ -27,7 +45,7 @@
     .then(res => res.json())
     .then(groups => {
       const groupList = document.getElementById("groupList");
-      groupList.innerHTML = "";  // 초기화
+      groupList.innerHTML = "";
 
       if (groups.length === 0) {
         groupList.textContent = "No groups available.";
@@ -36,12 +54,13 @@
 
       groups.forEach(group => {
         const div = document.createElement("div");
-        div.classList.add("group-box");
+        div.classList.add("card");
 
         div.innerHTML = `
-          <h4>${group.name}</h4>
-          <button onclick="joinGroup(${group.id})">Join</button>
-          <hr/>
+          <div class="card-header">
+            <span class="card-title">${group.name}</span>
+            <button class="btn" onclick="joinGroup(${group.id})">Join</button>
+          </div>
         `;
 
         groupList.appendChild(div);

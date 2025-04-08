@@ -6,16 +6,36 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h2>Create New Study Group</h2>
-  <form id="createGroupForm">
-    <label>Group Name:
-      <input type="text" name="name" required />
-    </label><br />
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="your_group.html">Your Groups</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <button type="submit">Create Group</button>
-  </form>
-
-  <button onclick="history.back()">Back</button>
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2>Create New Study Group</h2>
+        <form id="createGroupForm">
+          <div class="input-group">
+            <label for="group-name">Group Name</label>
+            <input type="text" id="group-name" name="name" placeholder="Enter group name" required />
+          </div>
+          <div class="input-group">
+            <button type="submit">Create Group</button>
+          </div>
+        </form>
+        <div class="input-group">
+          <button onclick="history.back()" class="btn btn-secondary">Back</button>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script>
     const token = localStorage.getItem("token");
