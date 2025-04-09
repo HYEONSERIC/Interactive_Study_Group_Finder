@@ -278,7 +278,7 @@
         <li><a href="meeting.html" class="nav-link">Meet Now!</a></li>
         <li><a href="find_help.html" class="nav-link">Find Study Help</a></li>
         <li><a href="search_users.html" class="nav-link">Search Study Groups</a></li>
-        <li><a href="#" class="nav-link" id="profileLink">Profile</a></li>
+        <li><a href="#" id="profileLink" class="nav-link">Profile</a></li>
         <li><a href="friends.html" class="nav-link">Friends</a></li>
         <li><a href="invites.html" class="nav-link">My Invites</a></li>
         <li><a href="about.html" class="nav-link">About Us</a></li>
@@ -518,7 +518,7 @@
         // Update name and profile
         document.getElementById("user-name").textContent = userData.name;
         document.getElementById("profile-initial").textContent = userData.name.charAt(0).toUpperCase();
-        document.getElementById("profileLink").href = `student_info.html?user_id=${userData.id}`;
+        document.getElementById("profileLink").href = `view-profile.html?username=${encodeURIComponent(userData.name)}`;
       } catch (error) {
         console.error("Error fetching user data:", error);
       }

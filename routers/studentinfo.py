@@ -62,8 +62,8 @@ def get_view_profile_page(username: str, request: Request, db: Session = Depends
     return templates.TemplateResponse("view-profile.html", {"request": request, "student": student}) 
 
 @router.post("/view-profile")
-def get_profile_info(student: StudentName, db: Session = Depends(get_db)):
-    student = db.query(StudentInformation).filter(StudentInformation.name == student.name).first()
+def get_profile_info(student_input: StudentName, db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.name == student_input.name).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     name = student.name
