@@ -67,6 +67,14 @@ class StudentInformation(Base):
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+class StudyGroups(Base):
+    __tablename__ = "study_groups"
+
+    group_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    group_name = Column(String(255), nullable=False)
+    subject_id = Column(String(255), ForeignKey("available_subjects.id"))
+    level_of_study = Column(String(255))
+    group_owner_id = Column(String(255),ForeignKey("student_information.id"))
 
 class StudentAvailability(Base):
     __tablename__ = "student_availability"
@@ -91,8 +99,8 @@ class StudentResponse(BaseModel):
     name: str
     email: str
 
-class StudentName(BaseModel):
-    name: str
+class PostQuery(BaseModel):
+    query_str: str
 
 
 # Create Tables (If a table gets deleted this will create them as long there is a connection to the DB.)
@@ -211,10 +219,20 @@ def get_view_profile_page(username: str, request: Request, db: Session = Depends
     return templates.TemplateResponse("view-profile.html", {"request": request, "student": student}) 
 
 @app.post("/view-profile")
-def get_profile_info(student: StudentName, db: Session = Depends(get_db)):
-    student = db.query(StudentInformation).filter(StudentInformation.name == student.name).first()
+def get_profile_info(student: PostQuery, db: Session = Depends(get_db)):
+    student = db.query(StudentInformation).filter(StudentInformation.name == student.query_str).first()
     if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-    name = student.name
-    email = student.email   
+        raise HTTPException(status_code=404, detail="Student not found") 
     return student
+
+@app.post("/study-groups")
+def get_profile_info(query: PostQuery, db: Session = Depends(get_db)):
+    groups = db.query(StudyGroups).filter(StudyGroups.group_name.contains(query.query_str)).all()
+    if not groups:
+        return {"error": "No study groups found matching criteria."}
+    response = {}
+    x=0
+    for group in groups:
+        response[f'{x}'] = group
+        x+=1
+    return response
