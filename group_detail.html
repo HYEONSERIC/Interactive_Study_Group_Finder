@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Group Detail</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="your_group.html">Your Groups</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2 id="groupName">Group Detail</h2>
+
+        <div class="input-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onclick="goToSchedule()" class="btn">Schedule Meeting</button>
+          <button onclick="viewMembers()" class="btn">View Members</button>
+          <button id="deleteGroupBtn" class="btn btn-danger" style="display: none;">Delete Group</button>
+          <button id="leaveGroupBtn" class="btn btn-secondary" style="display: none;">Leave Group</button>
+        </div>
+
+        <div class="profile-section">
+          <h3>Meetings</h3>
+          <ul id="meetingList" class="list-group"></ul>
+        </div>
+
+        <div id="memberList" class="profile-section" style="margin-top: 20px;"></div>
+
+        <div class="input-group">
+          <button onclick="goBack()" class="btn btn-secondary">Back</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get("group_id");
+
+    if (!token || !groupId) {
+      alert("Invalid access. Redirecting to login...");
+      window.location.href = "login.html";
+    }
+
+    const BASE_API_URL = "http://127.0.0.1:5000";
+
+    // 그룹 이름 불러오기
+    fetch(`${BASE_API_URL}/groups/my`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(groups => {
+      const group = groups.find(g => g.id == groupId);
+      if (group) {
+        document.getElementById("groupName").textContent = group.name;
+      } else {
+        document.getElementById("groupName").textContent = "Group Not Found";
+      }
+    })
+    .catch(err => {
+      console.error("Failed to load group name:", err);
+    });
+
+    // 미팅 리스트 불러오기
+    fetch(`${BASE_API_URL}/groups/${groupId}/schedule`)
+      .then(res => res.json())
+      .then(meetings => {
+        const list = document.getElementById("meetingList");
+        list.innerHTML = "";
+        if (meetings.length === 0) {
+          list.innerHTML = "<li>No meetings scheduled.</li>";
+        } else {
+          meetings.forEach(m => {
+            const li = document.createElement("li");
+            li.textContent = `${m.title} at ${new Date(m.meeting_time).toLocaleString()}`;
+            li.className = "list-item";
+            list.appendChild(li);
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load meetings:", err);
+      });
+
+    // 멤버 보기
+    function viewMembers() {
+      fetch(`${BASE_API_URL}/groups/${groupId}/members`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(members => {
+        const memberDiv = document.getElementById("memberList");
+        memberDiv.innerHTML = "<h3>Group Members</h3>";
+        if (members.length === 0) {
+          memberDiv.innerHTML += "<p>No members found.</p>";
+        } else {
+          const ul = document.createElement("ul");
+          members.forEach(m => {
+            const li = document.createElement("li");
+            li.textContent = `${m.name} (${m.email})`;
+            li.className = "list-item";
+            ul.appendChild(li);
+          });
+          memberDiv.appendChild(ul);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load members:", err);
+        alert("Failed to load group members.");
+      });
+    }
+
+    // 관리자 확인 → 버튼 분기 처리
+    fetch(`${BASE_API_URL}/groups/${groupId}/members`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(members => {
+      const currentUserEmail = JSON.parse(atob(token.split('.')[1])).sub;
+      const currentUser = members.find(m => m.email === currentUserEmail);
+
+      if (currentUser) {
+        if (currentUser.role === "admin") {
+          document.getElementById("deleteGroupBtn").style.display = "inline-block";
+        } else {
+          document.getElementById("leaveGroupBtn").style.display = "inline-block";
+        }
+      }
+    })
+    .catch(err => console.error("Failed to check user role:", err));
+
+    // 그룹 삭제 (관리자만)
+    document.getElementById("deleteGroupBtn").addEventListener("click", async function () {
+      if (!confirm("Are you sure you want to delete this group? This cannot be undone.")) return;
+
+      const res = await fetch(`${BASE_API_URL}/groups/${groupId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.status === 204) {
+        alert("Group deleted successfully.");
+        window.location.href = "your_group.html";
+      } else {
+        const data = await res.json();
+        alert("Failed to delete group: " + data.detail);
+      }
+    });
+
+    // 그룹 나가기 (일반 멤버용)
+    document.getElementById("leaveGroupBtn").addEventListener("click", async function () {
+      if (!confirm("Are you sure you want to leave this group?")) return;
+
+      const res = await fetch(`${BASE_API_URL}/leave_group/${groupId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        alert("You have left the group.");
+        window.location.href = "your_group.html";
+      } else {
+        const data = await res.json();
+        alert("Failed to leave group: " + data.detail);
+      }
+    });
+
+    function goToSchedule() {
+      window.location.href = `schedulemeeting.html?group_id=${groupId}`;
+    }
+
+    function goBack() {
+      window.location.href = "homepage.html";
+    }
+  </script>
+</body>
+</html>

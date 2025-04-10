@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Groups</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="create_group.html">Create Group</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2>Your Study Groups</h2>
+        <div id="groupList" class="list-container">
+          Loading your groups...
+        </div>
+        <div class="input-group">
+          <button onclick="location.href='homepage.html'" class="btn btn-secondary">Back to Home</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Login required!");
+      window.location.href = "login.html";
+    }
+
+    fetch("http://127.0.0.1:5000/groups/my", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(groups => {
+      const groupList = document.getElementById("groupList");
+      groupList.innerHTML = "";
+
+      if (groups.length === 0) {
+        groupList.innerHTML = "<p>You are not part of any groups.</p>";
+      } else {
+        groups.forEach(group => {
+          const card = document.createElement("div");
+          card.classList.add("card");
+
+          card.innerHTML = `
+            <div class="card-header">
+              <span class="card-title">${group.name}</span>
+              <a href="group_detail.html?group_id=${group.id}" class="btn">View</a>
+            </div>
+          `;
+
+          groupList.appendChild(card);
+        });
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("groupList").innerHTML = "<p>Failed to load groups.</p>";
+    });
+  </script>
+</body>
+</html>

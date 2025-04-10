@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Join a Group</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="your_group.html">Your Groups</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2>Join a Study Group</h2>
+        <div id="groupList" class="list-container">Loading groups...</div>
+        <div class="input-group">
+          <button onclick="window.location.href='homepage.html'" class="btn">Back</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const BASE_URL = "http://127.0.0.1:5000";
+
+    if (!token) {
+      alert("Unauthorized access");
+      window.location.href = "login.html";
+    }
+
+    // 그룹 리스트 로딩
+    fetch(`${BASE_URL}/all_groups`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(groups => {
+      const groupList = document.getElementById("groupList");
+      groupList.innerHTML = "";
+
+      if (groups.length === 0) {
+        groupList.textContent = "No groups available.";
+        return;
+      }
+
+      groups.forEach(group => {
+        const div = document.createElement("div");
+        div.classList.add("card");
+
+        div.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">${group.name}</span>
+            <button class="btn" onclick="joinGroup(${group.id})">Join</button>
+          </div>
+        `;
+
+        groupList.appendChild(div);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load groups", err);
+      document.getElementById("groupList").textContent = "Failed to load groups.";
+    });
+
+    function joinGroup(groupId) {
+      fetch(`${BASE_URL}/join_group/${groupId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(data => { throw new Error(data.detail); });
+        }
+        return res.json();
+      })
+      .then(data => {
+        alert(data.message);
+        window.location.href = "your_group.html";
+      })
+      .catch(err => {
+        alert("Error: " + err.message);
+      });
+    }
+  </script>
+</body>
+</html>

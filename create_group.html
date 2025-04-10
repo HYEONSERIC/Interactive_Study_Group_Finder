@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Group</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header id="header">
+    <div class="header-title">Study Group Finder</div>
+    <nav id="nav-bar">
+      <ul>
+        <li><a href="homepage.html" class="active">Home</a></li>
+        <li><a href="your_group.html">Your Groups</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="form-container">
+        <h2>Create New Study Group</h2>
+        <form id="createGroupForm">
+          <div class="input-group">
+            <label for="group-name">Group Name</label>
+            <input type="text" id="group-name" name="name" placeholder="Enter group name" required />
+          </div>
+          <div class="input-group">
+            <button type="submit">Create Group</button>
+          </div>
+        </form>
+        <div class="input-group">
+          <button onclick="history.back()" class="btn btn-secondary">Back</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    document.getElementById("createGroupForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const payload = {
+        name: formData.get("name")
+      };
+
+      const res = await fetch("http://127.0.0.1:5000/groups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert("✅ Group created successfully!");
+        window.location.href = "your_group.html";
+      } else {
+        const error = await res.text();
+        alert("❌ Failed to create group: " + error);
+      }
+    });
+  </script>
+</body>
+</html>

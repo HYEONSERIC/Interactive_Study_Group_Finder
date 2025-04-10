@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Users</title>
+  <link rel="stylesheet" href="search_user.css">
+</head>
+<body>
+  
+  <div class="container">
+    <h1>Student & Study Group Search</h1>
+
+    <div class="search-types">
+      <div class="search-type">
+        <input type="radio" id="student-search" name="search-type" value="student" checked>
+        <label for="student-search">Search Students</label>
+      </div>
+      <div class="search-type">
+        <input type="radio" id="group-search" name="search-type" value="group">
+        <label for="group-search">Search Study Groups</label>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Enter name, email or keyword...">
+      <button id="search-button">Search</button>
+    </div>
+
+    <div class="error-message" id="error-container" style="display: none;">
+      No results found. Please try a different search term.
+    </div>
+
+    <div class="loading" id="loading-container" style="display: none;">
+      <div class="loader"></div>
+      <p>Searching...</p>
+    </div>
+
+    <div class="results-container" id="results-container"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.getElementById('search-input');
+      const searchButton = document.getElementById('search-button');
+      const resultsContainer = document.getElementById('results-container');
+      const errorContainer = document.getElementById('error-container');
+      const loadingContainer = document.getElementById('loading-container');
+      const studentRadio = document.getElementById('student-search');
+      const groupRadio = document.getElementById('group-search');
+
+      const API_BASE_URL = 'http://127.0.0.1:5000';
+
+      async function searchStudents(query) {
+        try {
+          loadingContainer.style.display = 'block';
+          errorContainer.style.display = 'none';
+          resultsContainer.innerHTML = '';
+
+          const response = await fetch(`${API_BASE_URL}/students`);
+          if (!response.ok) throw new Error('Failed to fetch students');
+
+          const students = await response.json();
+          const filtered = students.filter(student =>
+            student.name.toLowerCase().includes(query.toLowerCase()) ||
+            student.email.toLowerCase().includes(query.toLowerCase())
+          );
+
+          loadingContainer.style.display = 'none';
+          if (filtered.length > 0) {
+            displayStudentResults(filtered);
+          } else {
+            errorContainer.style.display = 'block';
+            errorContainer.textContent = 'No students found.';
+          }
+        } catch (error) {
+          console.error(error);
+          loadingContainer.style.display = 'none';
+          errorContainer.style.display = 'block';
+          errorContainer.textContent = 'Error connecting to the server.';
+        }
+      }
+
+      async function searchGroups(query) {
+        try {
+          loadingContainer.style.display = 'block';
+          errorContainer.style.display = 'none';
+          resultsContainer.innerHTML = '';
+
+          const response = await fetch(`${API_BASE_URL}/search/study-groups`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ query_str: query })
+          });
+
+          if (!response.ok) throw new Error("Failed to fetch study groups");
+
+          const groups = await response.json();
+
+          loadingContainer.style.display = 'none';
+
+          if (groups.length > 0) {
+            displayGroupResults(groups);
+          } else {
+            errorContainer.style.display = 'block';
+            errorContainer.textContent = 'No study groups found.';
+          }
+
+        } catch (error) {
+          console.error('Error searching groups:', error);
+          loadingContainer.style.display = 'none';
+          errorContainer.style.display = 'block';
+          errorContainer.textContent = 'Error connecting to the server.';
+        }
+      }
+
+      function displayStudentResults(students) {
+        resultsContainer.innerHTML = '';
+        students.forEach(student => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          item.innerHTML = `
+            <div class="result-name">Name: ${student.name}</div>
+            
+          `;
+          resultsContainer.appendChild(item);
+        });
+      }
+
+      function displayGroupResults(groups) {
+        resultsContainer.innerHTML = '';
+        groups.forEach(group => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          item.innerHTML = `
+            <div class="result-name">Group Name: ${group.group_name || group.name}</div>
+            
+          `;
+          resultsContainer.appendChild(item);
+        });
+      }
+
+      searchButton.addEventListener('click', function () {
+        const query = searchInput.value.trim();
+        if (query.length < 2) {
+          errorContainer.style.display = 'block';
+          errorContainer.textContent = 'Please enter at least 2 characters.';
+          return;
+        }
+        if (studentRadio.checked) {
+          searchStudents(query);
+        } else {
+          searchGroups(query);
+        }
+      });
+
+      searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          searchButton.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
