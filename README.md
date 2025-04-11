@@ -4,7 +4,7 @@ find study group and interact
 link: https://hyeonseric.github.io/Interactive_Study_Group_Finder/
 
 To use this project:
-run the mysql_setup.txt file as a script in an empty mySQL database.
+Create a soft_project in a mysql database.
 Change database link in main.py if needed
 Download most recent "Python" code interpreter.
 Once python is downloaded open command window.
