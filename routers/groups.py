@@ -113,4 +113,6 @@ def my_study_groups(id: UserIDQuery, db: Session = Depends(get_db)):
     for group in myGroups:
         study_groups[f'group{x}'] = db.query(StudyGroup).filter(StudyGroup.id == group.group_id).first()
         study_groups[f'group{x}']["memberCount"] = len(db.query(GroupMember).filter(GroupMember.group_id == group.group_id))
+        study_groups[f'grou{x}']["meetings"] = db.query(MeetingSchedule).filter(MeetingSchedule.group_id == study_groups[f'group{x}'].id).all()
+        x += 1
     return study_groups
