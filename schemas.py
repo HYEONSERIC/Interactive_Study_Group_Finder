@@ -36,6 +36,9 @@ class PartnerInfo(BaseModel):
 class StudentName(BaseModel):
     name: str
 
+class UserIDQuery(BaseModel):
+    id: int
+
 # student info
 class StudentResponse(BaseModel):
     id: int
