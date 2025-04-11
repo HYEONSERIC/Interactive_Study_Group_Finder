@@ -491,7 +491,6 @@
       try {
         // Fetch user data
         fetchUserData();
-        fetchMeetings();
       } catch (error) {
         console.error("Error decoding token:", error);
         alert("Session error. Please login again.");
@@ -546,14 +545,21 @@
         }
 
         const study_groups = await response.json();
-        const myStudyGroupsContainer = document.getElementById("my-groups")
+        const myStudyGroupsContainer = document.getElementById("my-groups");
+        const groupCount = document.getElementById("groups-count");
+        groupCount.textContent = Object.keys(study_groups).length;
+        const meetingContainer = document.getElementById("upcoming-meetings");
+        const meetingCount = document.getElementById("meetings-count");
+        meetingCounter = 0;
+        meetingCount.textContent = meetingCounter;
+
         if (Object.keys(study_groups).length === 0) {
           myStudyGroupsContainer.innerHTML = "<p>No study groups yet. <a href='search_users.html'>Add some!</a></p>";
-          return;
-        }
+        } else {
 
-        study_groups.forEach(group => {
-          myStudyGroupsContainer.innerHTML += `
+          alert("0")
+          study_groups.forEach(group => {
+            myStudyGroupsContainer.innerHTML += `
               <div class="meeting-item">
                 <div class="meeting-icon">M</div>
                 <div class="meeting-details">
@@ -562,8 +568,30 @@
                 </div>
                 <button class="meeting-action">View</button>
               </div>`
-        })
-
+          })
+          
+          alert("1")
+          study_groups.foreach(group => {
+            group.meetings.forEach(meeting => {
+              meetingCounter += 1;
+              meetingContainer.innerHTML += `
+                <div class="meeting-item">
+                  <div class="meeting-icon">M</div>
+                  <div class="meeting-details">
+                    <h4 class="meeting-title">${meeting.title}</h4>
+                    <p class="meeting-time">${meeting.description} • ${group.name}</p>
+                  </div>
+                  <button class="meeting-action">View</button>
+                </div>`
+              })
+          })
+      }
+        alert("2")
+        meetingCount.textContent = meetingCounter;
+        if (meetingCounter === 0) {
+          meetingContainer.innerHTML = "<p>No Upcoming Meetings.</p>";
+        };
+        alert("3")
 
       } catch (error) {
         console.error("Error fetching user data:", error);

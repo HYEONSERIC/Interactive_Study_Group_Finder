@@ -4,7 +4,7 @@ from db import Base
 
 class StudentInformation(Base):
     __tablename__ = "student_information"
-
+    
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
@@ -62,8 +62,9 @@ class GroupMember(Base):
 class MeetingSchedule(Base):
     __tablename__ = "meeting_schedule"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     host_id = Column(Integer, ForeignKey("student_information.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("study_groups.id"), nullable=True)  # ✅ add this
     subject_id = Column(Integer, ForeignKey("available_subjects.id"), nullable=True)  # ✅ add this
     title = Column(String(255), nullable=False)
     description = Column(String(1000))
