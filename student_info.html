@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Info</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <div class="form-container">
+      <h2>Your Profile</h2>
+
+      <div class="input-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Enter your name" />
+      </div>
+
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" />
+      </div>
+
+      <div class="input-group">
+        <button id="update-profile">Update Profile</button>
+      </div>
+
+      <div id="message" class="success-message" style="display:none;"></div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem("token");
+      const nameInput = document.getElementById("name");
+      const emailInput = document.getElementById("email");
+      const messageBox = document.getElementById("message");
+      const updateButton = document.getElementById("update-profile");
+
+      let studentId = null;
+
+      if (!token) {
+        alert("You must be logged in to view this page.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Fetch current user data
+      fetch("http://localhost:5000/me", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch user data.");
+        return res.json();
+      })
+      .then(data => {
+        nameInput.value = data.name;
+        emailInput.value = data.email;
+        studentId = data.id; // Save ID for update
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("Could not load profile info. Try logging in again.");
+        window.location.href = "login.html";
+      });
+
+      // Update button click handler
+      updateButton.addEventListener("click", () => {
+        if (!studentId) return;
+
+        const updatedName = nameInput.value.trim();
+        const updatedEmail = emailInput.value.trim();
+
+        fetch(`http://localhost:5000/students/${studentId}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: updatedName,
+            email: updatedEmail
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to update profile.");
+          return res.json();
+        })
+        .then(data => {
+          messageBox.textContent = "Profile updated successfully.";
+          messageBox.style.display = "block";
+        })
+        .catch(err => {
+          console.error("Update error:", err);
+          alert("Failed to update profile.");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

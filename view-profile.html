@@ -31,7 +31,7 @@
         const response = await fetch("http://127.0.0.1:5000/view-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ "query_str":pname })
+          body: JSON.stringify({ "name":pname })
         });
   
         profile = await response.json();
@@ -62,7 +62,8 @@
       
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
-      profile_name = urlParams.get("username");
+      const profile_name = urlParams.get("username");
+      console.log("Sending name:", profile_name);
       document.getElementById("username").textContent = profile_name;
       profile_info = get_profile_data(profile_name, viewer_email);
       editButton = document.getElementById("edit-profile");
