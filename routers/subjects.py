@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import AvailableSubjects
-from schemas import SubjectCreate
+from models import AvailableSubjects, StudentSubjects
+from schemas import SubjectCreate, UserIDQuery
 
 router = APIRouter()
 
@@ -14,6 +14,11 @@ router = APIRouter()
 def get_subjects(db: Session = Depends(get_db)):
     subjects = db.query(AvailableSubjects).all()
     return subjects
+
+@router.put("/subjects")
+def get_subjects(id: UserIDQuery, db: Session = Depends(get_db)):
+    mysubjects = db.query(StudentSubjects).filter(StudentSubjects.student_id == id.id).all()
+    return mysubjects
 
 # API Endpoint - add subject
 @router.post("/subjects")
