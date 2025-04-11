@@ -466,8 +466,10 @@
   </main>
 
   <script>
+    const token = localStorage.getItem("token");
+
     document.addEventListener("DOMContentLoaded", function() {
-      const token = localStorage.getItem("token");
+
       fetch("http://localhost:5000/me", {
         method: "GET",
         headers: {
@@ -489,11 +491,7 @@
       try {
         // Fetch user data
         fetchUserData();
-        fetchUserStats();
         fetchMeetings();
-        fetchStudyGroups();
-        fetchStudyPartners();
-        fetchSubjects();
       } catch (error) {
         console.error("Error decoding token:", error);
         alert("Session error. Please login again.");
@@ -519,28 +517,58 @@
         document.getElementById("user-name").textContent = userData.name;
         document.getElementById("profile-initial").textContent = userData.name.charAt(0).toUpperCase();
         document.getElementById("profileLink").href = `view-profile.html?username=${encodeURIComponent(userData.name)}`;
+        fetchStudyPartners(userData.email)
+        fetchSubjects(userData.id);
+        fetchStudyGroups(userData.id);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     }
 
-    async function fetchUserStats(email) {
-      // This would be replaced with actual API calls
-      // For now, we'll just set some sample data
-      document.getElementById("meetings-count").textContent = "2";
-      document.getElementById("friends-count").textContent = "2";
-      document.getElementById("subjects-count").textContent = "3";
-      document.getElementById("groups-count").textContent = "2";
-    }
 
     async function fetchMeetings(email) {
       // This would be replaced with actual API calls to get upcoming meetings
       // The sample data is already in the HTML
     }
 
-    async function fetchStudyGroups(email) {
+    async function fetchStudyGroups(id) {
       // This would be replaced with actual API calls to get study groups
       // The sample data is already in the HTML
+      try {
+        const response = await fetch("http://127.0.0.1:5000/study_groups", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({"id":id})
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch subjects");
+        }
+
+        const study_groups = await response.json();
+        const myStudyGroupsContainer = document.getElementById("my-groups");
+        alert(study_groups);
+        if (Object.keys(study_groups).length === 0) {
+          myStudyGroupsContainer.innerHTML = "<p>No study groups yet. <a href='search_users.html'>Add some!</a></p>";
+          return;
+        }
+
+        study_groups.forEach(group => {
+          myStudyGroupsContainer.innerHTML += `
+              <div class="meeting-item">
+                <div class="meeting-icon">M</div>
+                <div class="meeting-details">
+                  <h4 class="meeting-title">${group.name}</h4>
+                  <p class="meeting-time">${group.memberCount} members • 3 meetings scheduled</p>
+                </div>
+                <button class="meeting-action">View</button>
+              </div>`
+        })
+
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
     }
 
     async function fetchStudyPartners(email) {
@@ -557,7 +585,8 @@
 
         const partners = await response.json();
         const partnersContainer = document.getElementById("study-partners");
-        
+        const partnerCount = document.getElementById("friends-count")
+        partnerCount.textContent = Object.keys(partners).length
         // Clear existing content
         partnersContainer.innerHTML = "";
         
@@ -585,12 +614,12 @@
       }
     }
 
-    async function fetchSubjects(email) {
+    async function fetchSubjects(id) {
       try {
         const response = await fetch("http://127.0.0.1:5000/subjects", {
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-          }
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({"id":id})
         });
 
         if (!response.ok) {
@@ -599,7 +628,8 @@
 
         const subjects = await response.json();
         const subjectsContainer = document.getElementById("my-subjects");
-        
+        const subjectCount = document.getElementById("subjects-count")
+        subjectCount.textContent = Object.keys(subjects).length
         // Clear existing content
         subjectsContainer.innerHTML = "";
         
