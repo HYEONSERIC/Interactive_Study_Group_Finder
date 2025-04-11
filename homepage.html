@@ -556,42 +556,38 @@
         if (Object.keys(study_groups).length === 0) {
           myStudyGroupsContainer.innerHTML = "<p>No study groups yet. <a href='search_users.html'>Add some!</a></p>";
         } else {
-
-          alert("0")
-          study_groups.forEach(group => {
+          myStudyGroupsContainer.innerHTML = "";
+          for (const group in study_groups) {
             myStudyGroupsContainer.innerHTML += `
               <div class="meeting-item">
                 <div class="meeting-icon">M</div>
                 <div class="meeting-details">
-                  <h4 class="meeting-title">${group.name}</h4>
-                  <p class="meeting-time">${group.memberCount} members • 3 meetings scheduled</p>
+                  <h4 class="meeting-title">${study_groups[group]["name"]}</h4>
+                  <p class="meeting-time">${study_groups[group]["memberCount"]} members • ${study_groups[group]["meetings"].length} meetings scheduled</p>
                 </div>
                 <button class="meeting-action">View</button>
               </div>`
-          })
+          }
           
-          alert("1")
-          study_groups.foreach(group => {
-            group.meetings.forEach(meeting => {
+          for (const group in study_groups) {
+            study_groups[group]["meetings"].forEach(meeting => {
               meetingCounter += 1;
               meetingContainer.innerHTML += `
                 <div class="meeting-item">
                   <div class="meeting-icon">M</div>
                   <div class="meeting-details">
-                    <h4 class="meeting-title">${meeting.title}</h4>
-                    <p class="meeting-time">${meeting.description} • ${group.name}</p>
+                    <h4 class="meeting-title">${meeting["title"]}</h4>
+                    <p class="meeting-time">${meeting["description"]} • ${study_groups[group]["name"]}</p>
                   </div>
                   <button class="meeting-action">View</button>
                 </div>`
               })
-          })
+          }
       }
-        alert("2")
         meetingCount.textContent = meetingCounter;
         if (meetingCounter === 0) {
           meetingContainer.innerHTML = "<p>No Upcoming Meetings.</p>";
         };
-        alert("3")
 
       } catch (error) {
         console.error("Error fetching user data:", error);
