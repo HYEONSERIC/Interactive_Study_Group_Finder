@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Users</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -49,8 +49,6 @@
             const loadingContainer = document.getElementById('loading-container');
             const studentRadio = document.getElementById('student-search');
             const groupRadio = document.getElementById('group-search');
-            loadingContainer.style.display = "None";
-            errorContainer.style.display = "None";
             
             // API base URL - change this to match your server
             const API_BASE_URL = 'http://127.0.0.1:5000';
@@ -80,6 +78,7 @@
                     
                     // Hide loading indicator
                     loadingContainer.style.display = 'none';
+                    
                     // Display results or error
                     if (filteredStudents.length > 0) {
                         displayStudentResults(filteredStudents);
@@ -95,35 +94,22 @@
             }
             
             // Function to search study groups
+            // Note: This is a placeholder as there's no study group endpoint in the provided backend
             async function searchGroups(query) {
                 try {
-                    // Show loading indicator
                     loadingContainer.style.display = 'block';
                     errorContainer.style.display = 'none';
                     resultsContainer.innerHTML = '';
-                    // Fetch groups matching query from the backend
-                    const response = await fetch(`${API_BASE_URL}/study-groups`, {
-                        method: "POST",
-                        headers: {"Content-Type": "application/json"},
-                        body: JSON.stringify({"query_str":query})
-        }           );
                     
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch students');
-                    }
-
-                    const groups = await response.json();
-                    
-                    // Hide loading indicator
-                    loadingContainer.style.display = 'none';
-                    // Display results or error
-                    if (groups) {
-                        displayGroupResults(groups);
-                    } else {
+                    // Since there's no study group endpoint, we'll show an appropriate message
+                    setTimeout(() => {
+                        loadingContainer.style.display = 'none';
                         errorContainer.style.display = 'block';
-                    }
+                        errorContainer.textContent = 'Study group search functionality is not yet implemented in the backend.';
+                    }, 1000);
+                    
                 } catch (error) {
-                    console.error('Error searching study groups:', error);
+                    console.error('Error searching groups:', error);
                     loadingContainer.style.display = 'none';
                     errorContainer.style.display = 'block';
                     errorContainer.textContent = 'Error connecting to the server. Please try again later.';
@@ -135,10 +121,6 @@
                 resultsContainer.innerHTML = '';
                 
                 students.forEach(student => {
-                    const linkItem = document.createElement('a');
-                    linkItem.id = "search-users-result-link";
-                    linkItem.href = `./view-profile.html?username=${student.name}`;
-
                     const resultItem = document.createElement('div');
                     resultItem.className = 'result-item';
                     
@@ -152,36 +134,8 @@
                     
                     resultItem.appendChild(nameElement);
                     resultItem.appendChild(emailElement);
-                    linkItem.appendChild(resultItem);
-                    resultsContainer.appendChild(linkItem);
+                    resultsContainer.appendChild(resultItem);
                 });
-            }
-
-            function displayGroupResults(groups) {
-                resultsContainer.innerHTML = '';
-                
-                for (key in groups) {
-                    group = groups[key];
-                    const linkItem = document.createElement('a');
-                    linkItem.id = "search-study-groups-result-link";
-                    //linkItem.href = `./view-group-page.html?group_name=${group.group_name}`;
-
-                    const resultItem = document.createElement('div');
-                    resultItem.className = 'result-item';
-                    
-                    const nameElement = document.createElement('div');
-                    nameElement.className = 'result-name';
-                    nameElement.textContent = group.group_name;
-                    
-                    const groupOwnerElement = document.createElement('div');
-                    groupOwnerElement.className = 'result-email';
-                    //groupOwnerElement.textContent = group.group_owner_name;
-                    
-                    resultItem.appendChild(nameElement);
-                    resultItem.appendChild(groupOwnerElement);
-                    linkItem.appendChild(resultItem);
-                    resultsContainer.appendChild(linkItem);
-                };
             }
             
             // Search button click event

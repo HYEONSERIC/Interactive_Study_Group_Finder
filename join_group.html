@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Join a Group</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h2>Join a Study Group</h2>
+  <div id="groupList">Loading groups...</div>
+
+  <button onclick="window.location.href='homepage.html'">Back</button>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const BASE_URL = "http://127.0.0.1:8000";
+
+    if (!token) {
+      alert("Unauthorized access");
+      window.location.href = "login.html";
+    }
+
+    // 그룹 리스트 로딩
+    fetch(`${BASE_URL}/all_groups`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(groups => {
+      const groupList = document.getElementById("groupList");
+      groupList.innerHTML = "";  // 초기화
+
+      if (groups.length === 0) {
+        groupList.textContent = "No groups available.";
+        return;
+      }
+
+      groups.forEach(group => {
+        const div = document.createElement("div");
+        div.classList.add("group-box");
+
+        div.innerHTML = `
+          <h4>${group.name}</h4>
+          <button onclick="joinGroup(${group.id})">Join</button>
+          <hr/>
+        `;
+
+        groupList.appendChild(div);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load groups", err);
+      document.getElementById("groupList").textContent = "Failed to load groups.";
+    });
+
+    function joinGroup(groupId) {
+      fetch(`${BASE_URL}/join_group/${groupId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(data => { throw new Error(data.detail); });
+        }
+        return res.json();
+      })
+      .then(data => {
+        alert(data.message);
+        window.location.href = "your_group.html";
+      })
+      .catch(err => {
+        alert("Error: " + err.message);
+      });
+    }
+  </script>
+</body>
+</html>
